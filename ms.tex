@@ -155,11 +155,12 @@ are visible from Earth because they reflect sunlight, especially during twilight
 illuminated LEO satellites move across the field of view of an astronomical pointing, they leave
 a streak in the image, which negatively impacts the scientific value of the pointing. Astronomers
 predict there will be at least one satellite streaks in the majority of exposures of the Rubin
-Observatory \citep{lawrence22}.An example of satellite streaks in an astronomical image is shown in Figure \ref{fig-streaks}.
+Observatory \citep{lawrence22}. % XXX-but, our results say OneWeb streaks 10% of Rubin images. We shouldn't repeat claims we know are wrong. And this is just citing tyson20, which does not say the majority of exposures would have a streak. 
+An example of satellite streaks in an astronomical image is shown in Figure \ref{fig-streaks}.
 
-\begin{figure}[ht!]\label{fig-streaks}
-%\includegraphics{}  % preferably .eps
-\caption{This is a caption}
+\begin{figure}[ht!]
+%\includegraphics{} 
+\caption{Example image of a satellite streak \label{fig-streaks}}
 \end{figure}
 
 There have been efforts to reduce the impact of satellite streaks in astronomical pointings.
@@ -180,12 +181,17 @@ observing programs.
 %\section{Constellations}
 
 \section{Methodology}
-We begin by creating realistic forecasts of three different commercial satellite constellations: StarlinkV1 (4408 satellites, altitude 550 km), OneWeb (6372 satellites, altitude 550km), and StarlinkV2 (29988 satellites, altitude 550km). All three of these constellations are highly likely to launch as designed, or close to it, as both operators presently have functional satellites in orbit and are working to build and launch more. These simulated satellite
+We begin by creating realistic forecasts of three different commercial satellite constellations: StarlinkV1 (4408 satellites, altitude 540-570 km), OneWeb (6372 satellites, altitude 1200 km), and StarlinkV2 (29988 satellites, altitude 340-614 km). All three of these constellations are highly likely to launch as designed (XXX-lol, no), or close to it, as both operators presently have functional satellites in orbit and are working to build and launch more. These simulated satellite
 constellations are illustrated in Figure \ref{fig-simulated-constellations}.
 
-\begin{figure}[ht!]\label{fig-simulated-constellations}
-%\includegraphics{}  % preferably .eps
-\caption{This is a caption}
+\begin{figure}[ht!]
+\epsscale{0.5}
+%% XXX--ugh, so these have enough points that they take forever to render. Thoughts on how to improve welcome
+%\plotone{plots/sats_slv1.pdf}
+%\plotone{plots/sats_slv2.pdf}
+%\plotone{plots/sats_ow.pdf}
+\epsscale{1}
+\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 with a sun altitude of -18 degrees. Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations}}
 \end{figure}
 
 Using these simulated satellite constellations, we add an additional weighting for satellite
@@ -194,12 +200,14 @@ satellite maps across a determined time frame. Based on the predicted location o
 scheduler creates a reward weighting: areas with more illuminated satellites will receive a more
 negative reward weighting, or in other words, the scheduler is incentivized to avoid them. The
 scheduler then combines the satellite reward weights with other weights to determine where to
-point the telescope to take the next set of simulated observations. Figure \ref{fig-simulated-scheduler} shows an example of
+point the telescope to take the next set of simulated observations. Figure~\ref{fig-simulated-scheduler} shows an example of
 scheduler weighting for the three simulated satellite constellations at two different sun altitudes.
 
-\begin{figure}[ht!]\label{fig-simulated-scheduler}
+XXX--quantify the basis function maps a bit more. The positions of the illuminated satellites are computed in 10s intervals. These maps are then summed over 90 minute blocks to generate an avoidance map. 
+
+\begin{figure}[ht!]
 %\includegraphics{}  % preferably .eps
-\caption{This is a caption}
+\caption{Example of satellite avoidance maps. \label{fig-simulated-scheduler}}
 \end{figure}
 
 As shown in Figure \ref{fig-simulated-scheduler}, the predicted OneWeb constellation map has more negative reward
@@ -235,10 +243,10 @@ also found that smaller constellations at lower orbital altitudes (StarlinkV1 fo
 inherently results in less pixel loss per pointing, nearly independent of the dodging weight.
 Figure \ref{fig-pixel-loss-weight} shows that the added weighted dodging algorithm was able to effectively avoid satellite streaks in pointings.
 
-\begin{figure}[ht!]\label{fig-pixel-loss-weight}
+\begin{figure}[ht!]
 %
 %\includegraphics{}  % preferably .eps
-\caption{This is a caption}
+\caption{Pixels lost as a function of satellite dodging weight. \label{fig-pixel-loss-weight}}
 \end{figure}
 
 We then investigate the relationship between number of exposures taken and the dodging
@@ -259,9 +267,9 @@ illuminated satellites, which could result in longer slew time or less desirable
 conditions, which contribute to a loss in survey depth. Therefore, we evaluate the tradeoff
 between survey depth loss and satellite avoidance using the dodging algorithm.\\
 
-\begin{figure}[ht!]\label{fig-trade-off}
+\begin{figure}[ht!]
 %\includegraphics{}  % preferably .eps
-\caption{This is a caption}
+\caption{Pixel loss vs coadded depth. \label{fig-trade-off}}
 \end{figure}
 
 As shown in Figure \ref{fig-trade-off} , for all three constellations, minor reduction in mean pixel loss per visit
@@ -317,7 +325,8 @@ in order to optimize satellite avoidance.
           Numpy \citep{harris2020array},
           rubin\_sim \citep{yoachim2022},
           Scipy \citep{2020SciPy-NMeth},
-          Shapely\footnote{https://github.com/shapely/shapely}}
+          Skyfield \citep{Rhodes2019}, 
+          Shapely \citep{shapely2007}}
           % todo: add citation to newest 2022 astropy paper
 
 \bibliography{ms}{}
