@@ -205,6 +205,8 @@ scheduler weighting for the three simulated satellite constellations at two diff
 
 XXX--quantify the basis function maps a bit more. The positions of the illuminated satellites are computed in 10s intervals. These maps are then summed over 90 minute blocks to generate an avoidance map. 
 
+XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. Maybe add a zonodo to the repo so we can cite where we got the baseline simulation from.
+
 \begin{figure}[ht!]
 %\includegraphics{}  % preferably .eps
 \caption{Example of satellite avoidance maps. \label{fig-simulated-scheduler}}
@@ -244,9 +246,9 @@ inherently results in less pixel loss per pointing, nearly independent of the do
 Figure \ref{fig-pixel-loss-weight} shows that the added weighted dodging algorithm was able to effectively avoid satellite streaks in pointings.
 
 \begin{figure}[ht!]
-\plottwo{plots/nexp_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
-\plottwo{plots/streaklen_v_weight.pdf}{plots/streak_length_v_deltam.pdf}
-\caption{Pixels lost as a function of satellite dodging weight. \label{fig-pixel-loss-weight}}
+\plottwo{plots/streaklen_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
+\plottwo{plots/nexp_v_weight.pdf}{plots/streak_length_v_deltam.pdf}
+\caption{Results from simulating the first year of Rubin observations in the presence of different satellite constellations and varying how strongly the scheduler attempts to avoid satellites.  Top panels show that, as expected, the number of streaks and mean streak length decrease as more emphasis is put on satellite dodging. Bottom panels show the resulting trade off, as avoiding satellites forces the scheduler to make longer slews and observe less desirable parts of the sky, resulting in fewer total exposures in the first year and a shallower median coadded depth. \label{fig-pixel-loss-weight}}
 \end{figure}
 
 We then investigate the relationship between number of exposures taken and the dodging
