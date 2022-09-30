@@ -185,13 +185,13 @@ We begin by creating realistic forecasts of three different commercial satellite
 constellations are illustrated in Figure \ref{fig-simulated-constellations}.
 
 \begin{figure}[ht!]
-\epsscale{0.5}
-%% XXX--ugh, so these have enough points that they take forever to render. Thoughts on how to improve welcome
-%\plotone{plots/sats_slv1.pdf}
-%\plotone{plots/sats_slv2.pdf}
-%\plotone{plots/sats_ow.pdf}
+\epsscale{0.35}
+%% XXX--matplotlib seems to like leaving a huge bounding box buffer around 
+\plotone{plots/sats_slv1.pdf}
+\plotone{plots/sats_slv2.pdf}
+\plotone{plots/sats_ow.pdf}
 \epsscale{1}
-\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 with a sun altitude of -18 degrees. Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations}}
+\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 (sun altitude -18 degrees). Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations}}
 \end{figure}
 
 Using these simulated satellite constellations, we add an additional weighting for satellite
