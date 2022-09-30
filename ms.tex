@@ -247,8 +247,10 @@ Figure \ref{fig-pixel-loss-weight} shows that the added weighted dodging algorit
 
 \begin{figure}[ht!]
 \plottwo{plots/streaklen_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
-\plottwo{plots/nexp_v_weight.pdf}{plots/streak_length_v_deltam.pdf}
-\caption{Results from simulating the first year of Rubin observations in the presence of different satellite constellations and varying how strongly the scheduler attempts to avoid satellites.  Top panels show that, as expected, the number of streaks and mean streak length decrease as more emphasis is put on satellite dodging. Bottom panels show the resulting trade off, as avoiding satellites forces the scheduler to make longer slews and observe less desirable parts of the sky, resulting in fewer total exposures in the first year and a shallower median coadded depth. \label{fig-pixel-loss-weight}}
+\plottwo{plots/nexp_v_weight.pdf}{plots/deltam_v_weight.pdf}
+\caption{Results from simulating the first year of Rubin observations in the presence of different satellite constellations and varying how strongly the scheduler attempts to avoid satellites.  Top panels show that, as expected, the number of streaks and mean streak length decrease as more emphasis is put on satellite dodging. Bottom panels show the resulting trade off, as avoiding satellites forces the scheduler to make longer slews and observe less desirable parts of the sky, resulting in fewer total exposures in the first year and a shallower median coadded depth in $g$.
+xxx--could stack these and share the x-axis. Need to fix the y-label getting cut off.
+\label{fig-pixel-loss-weight}}
 \end{figure}
 
 We then investigate the relationship between number of exposures taken and the dodging
@@ -299,6 +301,8 @@ of pixels destroyed by satellite streaks constitutes a very small percentage of 
 Therefore, while the weighted dodging algorithm is effective at reducing satellite streaks in
 images, at the current stage, satellite avoidance is mostly unnecessary considering the trade-off
 between pixel loss and loss in overall survey depth.
+
+xxx--Maybe a table for estimated pixel/area losses for different things. Something like narrow streak mask, wide streak mask, chip gaps, and bright/saturated stars. 
 
 \section{Future Work}
 While the satellite dodging algorithm is mostly unnecessary for the three satellite
