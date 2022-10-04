@@ -208,7 +208,7 @@ XXX--quantify the basis function maps a bit more. The positions of the illuminat
 XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. Maybe add a zonodo to the repo so we can cite where we got the baseline simulation from.
 
 \begin{figure}[ht!]
-%\includegraphics{}  % preferably .eps
+% \plotone{plots/}
 \caption{Example of satellite avoidance maps. \label{fig-simulated-scheduler}}
 \end{figure}
 
@@ -232,10 +232,11 @@ plane. Using the shapely python library, we calculate the intersection length of
 points and the circle.
 Therefore, with a given simulated satellite constellation and a schedule of observations,
 we record the number of satellites that occur in each field of view and measure how long the
-satellite streaks are. Using a realistic estimated satellite streak width of 50 pixels, we can convert
+satellite streaks are. Using a realistic estimated satellite streak width of 50 pixels ($\sim$XXX arcsec), we can convert
 the streak length results into the number of affected image pixels, which allows us to
 quantitatively measure the efficiency of the dodging algorithm with pixel loss. 
 
+XXX--Should we add in the results from looking at a run with twilight NEO survey observations? Doesn't flow well with everything else, but I think it is a result that will help some folks calm down a bit that we aren't going to miss tons of killer asteroids even with large constellations.
 
 \section{Results}
 We begin by investigating the efficiency of the added weighting algorithm on dodging
