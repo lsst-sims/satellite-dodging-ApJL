@@ -277,8 +277,12 @@ conditions, which contribute to a loss in survey depth. Therefore, we evaluate t
 between survey depth loss and satellite avoidance using the dodging algorithm.\\
 
 \begin{figure}[ht!]
-%\includegraphics{}  % preferably .eps
-\caption{Pixel loss vs coadded depth. \label{fig-trade-off}}
+\epsscale{0.35}
+\plotone{plots/slv1coadd.pdf}
+\plotone{plots/slv2coadd.pdf}
+\plotone{plots/onewcoadd.pdf}
+\epsscale{1}
+\caption{The trade off between pixels lost to streaks and final median coadded depth of the survey. Points to the right of the dashed line show improvement while those to the left signify the regained pixels do not adequatly compensate for the lost depth. In no situation are we able to prevent depth loss in at least some filters. \label{fig-trade-off}}
 \end{figure}
 
 As shown in Figure \ref{fig-trade-off} , for all three constellations, minor reduction in mean pixel loss per visit
