@@ -158,6 +158,8 @@ predict there will be at least one satellite streaks in the majority of exposure
 Observatory \citep{lawrence22}. % XXX-but, our results say OneWeb streaks 10% of Rubin images. We shouldn't repeat claims we know are wrong. And this is just citing tyson20, which does not say the majority of exposures would have a streak. 
 An example of satellite streaks in an astronomical image is shown in Figure \ref{fig-streaks}.
 
+XXX--\citet{tyson20} used a very simple algorithm to try and avoid satellite streaks.  In this paper, rather than try to avoid all satellite streaks, we incorporate satellite avoidance as a component on the scheduler's Markov Decision Process, allowing us to avoid a large fraction of satellite streaks without significantly compromising the performance of the survey. 
+
 \begin{figure}[ht!]
 %\includegraphics{} 
 \caption{Example image of a satellite streak \label{fig-streaks}}
@@ -186,12 +188,14 @@ constellations are illustrated in Figure \ref{fig-simulated-constellations}.
 
 \begin{figure}[ht!]
 \epsscale{0.35}
-%% XXX--matplotlib seems to like leaving a huge bounding box buffer around 
 \plotone{plots/sats_slv1.pdf}
 \plotone{plots/sats_slv2.pdf}
-\plotone{plots/sats_ow.pdf}
+\plotone{plots/sats_ow.pdf}\\
+\plotone{plots/sats_slv1_late.pdf}
+\plotone{plots/sats_slv2_late.pdf}
+\plotone{plots/sats_ow_late.pdf}
 \epsscale{1}
-\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 (sun altitude -18 degrees). Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations}}
+\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 (sun altitude -18 degrees). Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations} XXX--could add a second row to show how nothing is up when the sun is very low.}
 \end{figure}
 
 Using these simulated satellite constellations, we add an additional weighting for satellite
