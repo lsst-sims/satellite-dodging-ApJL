@@ -208,8 +208,12 @@ XXX--quantify the basis function maps a bit more. The positions of the illuminat
 XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. Maybe add a zonodo to the repo so we can cite where we got the baseline simulation from.
 
 \begin{figure}[ht!]
-% \plotone{plots/}
-\caption{Example of satellite avoidance maps. \label{fig-simulated-scheduler}}
+\epsscale{0.3}
+\plotone{plots/starlink_tles_v1_0.00_basisfunc.pdf}
+\plotone{plots/starlink_tles_v2_0.00_basisfunc.pdf}
+\plotone{plots/oneweb_tles_0.00_basisfunc.pdf}
+\epsscale{1}
+\caption{Example of satellite avoidance maps constructed for the scheduler. The maps have been rotated so zenith is in the center of the image. By varying the weight placed on these maps, the scheduler will more actively avoid regions of the sky where satellites could streak images. \label{fig-simulated-scheduler}}
 \end{figure}
 
 As shown in Figure \ref{fig-simulated-scheduler}, the predicted OneWeb constellation map has more negative reward
