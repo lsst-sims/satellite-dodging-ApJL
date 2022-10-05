@@ -135,59 +135,29 @@ Best abstract ever
 
 \section{Introduction} \label{sec:intro}
 
-Vera C. Rubin Observatory's Legacy Survey of Space and Time (LSST) is a ten-year
-astronomical imaging survey that will begin in 2024 from a new telescope in Chile. Instead
-of soliciting individual requests for what the telescope should point at, the LSST will uniformly
-survey the sky every three nights in six color filters to essentially create a decade-long
-high-resolution survey of the entire southern sky, and share massive quantities of data products
-with the astronomy community \citep{overview}.
+Vera C. Rubin Observatory's Legacy Survey of Space and Time (LSST) is a ten-year astronomical imaging survey that will begin in 2024 from a new telescope in Chile. Instead of soliciting individual requests for what the telescope should point at, the LSST will uniformly survey the sky every three nights in six color filters to essentially create a decade-long high-resolution survey of the entire southern sky, and share massive quantities of data products with the astronomy community \citep{overview}.
 
-To accomplish this, there is a complex scheduler algorithm that takes into account various
-science priorities, including slew time, survey uniformity, and image depth \citep{naghib19}. The Rubin
-Scheduler algorithm creates weightings for various science priorities and uses the weighting to
-create a path for pointing observation.
+To accomplish this, there is a complex scheduler algorithm that takes into account various science priorities, including slew time, survey uniformity, and image depth \citep{naghib19}. The Rubin Scheduler algorithm creates weightings for various science priorities and uses the weighting to create a path for pointing observation.
 
-However, one challenge for the LSST is that increasing numbers of bright
-Low-Earth-Orbit (LEO) satellites (e.g., Starlink) are being launched, which could leave streaks
-in astronomical pointings. Over the last three years, many astronomers have raised concerns
-about the impact of this on the LEO ecosystem and astronomical surveys \citep{lawrence22,tyson20}. LEO satellites
-are visible from Earth because they reflect sunlight, especially during twilight. As the
-illuminated LEO satellites move across the field of view of an astronomical pointing, they leave
-a streak in the image, which negatively impacts the scientific value of the pointing. Astronomers
-predict there will be at least one satellite streaks in the majority of exposures of the Rubin
-Observatory \citep{lawrence22}. % XXX-but, our results say OneWeb streaks 10% of Rubin images. We shouldn't repeat claims we know are wrong. And this is just citing tyson20, which does not say the majority of exposures would have a streak. 
-An example of satellite streaks in an astronomical image is shown in Figure \ref{fig-streaks}.
+However, one challenge for the LSST is that increasing numbers of bright Low-Earth-Orbit (LEO) satellites (e.g., Starlink) are being launched, which could leave streaks in astronomical pointings. Over the last three years, many astronomers have raised concerns
+about the impact of this on the LEO ecosystem and astronomical surveys \citep{lawrence22,tyson20}. LEO satellites are visible from Earth because they reflect sunlight, especially during twilight. As the illuminated LEO satellites move across the field of view of an astronomical pointing, they leave a streak in the image, which negatively impacts the scientific value of the pointing.
 
 XXX--\citet{tyson20} used a very simple algorithm to try and avoid satellite streaks.  In this paper, rather than try to avoid all satellite streaks, we incorporate satellite avoidance as a component on the scheduler's Markov Decision Process, allowing us to avoid a large fraction of satellite streaks without significantly compromising the performance of the survey. 
 
-\begin{figure}[ht!]
-%\includegraphics{} 
-\caption{Example image of a satellite streak \label{fig-streaks}}
-\end{figure}
-
-There have been efforts to reduce the impact of satellite streaks in astronomical pointings.
-Satellite companies like SpaceX have worked on darkening the exterior of satellites so they will
-be less illuminated [CITE SPACEX BLOG POST]. However, even with extra darkening, the Starlink satellites are still one
-magnitude too bright for the observatory cameras, meaning these darkened satellite movements
-will still be captured by the camera. Astronomers have worked on algorithms for masking
-satellite trails in images, but covering the outer rim of the trails without losing extra pixels
-remains a challenge \citep{tyson20}.
-The rapid increase in population of LEO satellites threatens to compromise the quality
-and scientific value of the LSST images and also necessitates expensive computational power to
-mask the trails. Thus, we explore another option: incorporating known commercial satellites into
-the Rubin Scheduler so the worst of them may be avoided. In this project, we create realistic
-simulated forecasts of satellite trajectories and brightness, build a tool that uses that data to create
-new scheduler constraints, and test the impact of the new scheduler on various Rubin LSST
-observing programs.
-
-%\section{Constellations}
+There have been efforts to reduce the impact of satellite streaks in astronomical pointings. Satellite companies like SpaceX have worked on darkening the exterior of satellites so they will be less illuminated\footnote{\url{https://api.starlink.com/public-files/BrightnessMitigationBestPracticesSatelliteOperators.pdf}}. However, even with extra darkening, the Starlink satellites are still one magnitude too bright for the observatory cameras, meaning these darkened satellite movements will still be captured by the camera. Astronomers have worked on algorithms for masking satellite trails in images, but covering the outer rim of the trails without losing extra pixels remains a challenge \citep{tyson20}. The rapid increase in population of LEO satellites threatens to compromise the quality and scientific value of the LSST images and also necessitates expensive computational power to mask the trails. Thus, we explore another option: incorporating known commercial satellites into the Rubin Scheduler so the worst of them may be avoided. In this project, we create realistic simulated forecasts of satellite trajectories and brightness, build a tool that uses that data to create new scheduler constraints, and test the impact of the new scheduler on various Rubin LSST observing programs.
 
 \section{Methodology}
-We begin by creating realistic forecasts of three different commercial satellite constellations: StarlinkV1 (4408 satellites, altitude 540-570 km), OneWeb (6372 satellites, altitude 1200 km), and StarlinkV2 (29988 satellites, altitude 340-614 km). All three of these constellations are highly likely to launch as designed (XXX-lol, no), or close to it, as both operators presently have functional satellites in orbit and are working to build and launch more. These simulated satellite
-constellations are illustrated in Figure \ref{fig-simulated-constellations}.
+We begin by creating realistic forecasts of three different commercial satellite constellations: StarlinkV1 (4,408 satellites, altitude 540-570 km), OneWeb (6,372 satellites, altitude 1200 km), and StarlinkV2 (29,988 satellites, altitude 340-614 km). All three of these constellations are highly likely to launch as designed (XXX-lol, no), or close to it, as both operators presently have functional satellites in orbit and are working to build and launch more. These simulated satellite constellations are illustrated in Figure \ref{fig-simulated-constellations}.
 
+% TODO: add three more panels on the top that show each simulated constellation
+% as it appeared in the poster
+% TODO: make label fonts on each figure GINORMOUS so they are legible when shrunk,
+% and delete any extraneous labels
 \begin{figure}[ht!]
 \epsscale{0.35}
+\plotone{plots/starlinkv1.pdf}
+\plotone{plots/starlinkv2.pdf}
+\plotone{plots/oneweb.pdf}
 \plotone{plots/sats_slv1.pdf}
 \plotone{plots/sats_slv2.pdf}
 \plotone{plots/sats_ow.pdf}\\
@@ -195,24 +165,17 @@ constellations are illustrated in Figure \ref{fig-simulated-constellations}.
 \plotone{plots/sats_slv2_late.pdf}
 \plotone{plots/sats_ow_late.pdf}
 \epsscale{1}
-\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 (sun altitude -18 degrees). Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. \label{fig-simulated-constellations} XXX--could add a second row to show how nothing is up when the sun is very low.}
+\caption{Hammer projection of the altitude and azimuth positions of our simulated satellite constellations as seen from Rubin Observatory on October 1, 2023 (sun altitude -18 degrees). Red points show un-illuminated satellites, blue points show those illuminated by the sun, and black points are illuminated and above the Rubin altitude limit. The second row is the same, but for 6 hours later when the sun has reached and altitude of -50 degrees. Because the Starlink constellations are lower altitude, they have no illuminated satellites in the middle of the night, while the OneWeb constellation has only one illuminated satellite above the Rubin altitude limit. \label{fig-simulated-constellations} }
 \end{figure}
 
-Using these simulated satellite constellations, we add an additional weighting for satellite
-dodging to the Rubin Scheduler. Given an input satellite distribution, the scheduler predicts
-satellite maps across a determined time frame. Based on the predicted location of satellites, the
-scheduler creates a reward weighting: areas with more illuminated satellites will receive a more
-negative reward weighting, or in other words, the scheduler is incentivized to avoid them. The
-scheduler then combines the satellite reward weights with other weights to determine where to
-point the telescope to take the next set of simulated observations. Figure~\ref{fig-simulated-scheduler} shows an example of
-scheduler weighting for the three simulated satellite constellations at two different sun altitudes.
+Using these simulated satellite constellations, we add an additional weighting for satellite dodging to the Rubin Scheduler. Given an input satellite distribution, the scheduler predicts satellite maps across a determined time frame. Based on the predicted location of satellites, the scheduler creates a reward weighting: areas with more illuminated satellites will receive a more negative reward weighting, or in other words, the scheduler is incentivized to avoid them. The scheduler then combines the satellite reward weights with other weights to determine where to point the telescope to take the next set of simulated observations. Figure~\ref{fig-simulated-scheduler} shows an example of scheduler weighting for the three simulated satellite constellations at two different sun altitudes.
 
 XXX--quantify the basis function maps a bit more. The positions of the illuminated satellites are computed in 10s intervals. These maps are then summed over 90 minute blocks to generate an avoidance map. 
 
 XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. Maybe add a zonodo to the repo so we can cite where we got the baseline simulation from.
 
 \begin{figure}[ht!]
-\epsscale{0.3}
+\epsscale{0.37}
 \plotone{plots/starlink_tles_v1_0.00_basisfunc.pdf}
 \plotone{plots/starlink_tles_v2_0.00_basisfunc.pdf}
 \plotone{plots/oneweb_tles_0.00_basisfunc.pdf}
@@ -220,39 +183,10 @@ XXX--I'll add some text describing the baseline scheduler that we use--note that
 \caption{Example of satellite avoidance maps constructed for the scheduler. The maps have been rotated so zenith is in the center of the image. By varying the weight placed on these maps, the scheduler will more actively avoid regions of the sky where satellites could streak images. \label{fig-simulated-scheduler}}
 \end{figure}
 
-As shown in Figure \ref{fig-simulated-scheduler}, the predicted OneWeb constellation map has more negative reward
-weighting than other constellations. Although the OneWeb constellation has fewer satellites than
-the StarlinkV2 constellation, the OneWeb constellation is at a higher altitude, meaning that its
-satellites will be illuminated for a longer portion of the night, and not just close to twilight.
-Therefore, OneWeb shows more negative weighting than StarlinkV2 though it has a smaller
-satellite population.
-To investigate whether the scheduler behaves how we expect with the new satellite
-weighting added we create a testing function that measures the length of satellite streaks in the
-simulated field of views. To ensure efficiency, only satellites that are above the altitude limit and
-illuminated by the sun will be considered. Satellites below the altitude limit (indicated in the gray
-region in Figure \ref{fig-simulated-scheduler}) can’t be observed in pointings and are therefore not included for efficiency.
-For each satellite, we first determine whether they are in the field of view for any given
-telescope pointing by calculating their distance from the center of the field of view. If their
-distance from the field of view is less than the radius of the field of view, the satellite has crossed
-through the pointing. To quantify the impact of the satellite on the pointing, we then project the satellite location as well as the pointing to a 2D x,y plane. In the 2D plane, the field of pointing
-becomes roughly a circle and the start and end locations of the satellite become two points on the
-plane. Using the shapely python library, we calculate the intersection length of the satellite location
-points and the circle.
-Therefore, with a given simulated satellite constellation and a schedule of observations,
-we record the number of satellites that occur in each field of view and measure how long the
-satellite streaks are. Using a realistic estimated satellite streak width of 50 pixels ($\sim$XXX arcsec), we can convert
-the streak length results into the number of affected image pixels, which allows us to
-quantitatively measure the efficiency of the dodging algorithm with pixel loss. 
-
-XXX--Should we add in the results from looking at a run with twilight NEO survey observations? Doesn't flow well with everything else, but I think it is a result that will help some folks calm down a bit that we aren't going to miss tons of killer asteroids even with large constellations.
+As shown in Figure \ref{fig-simulated-scheduler}, the predicted OneWeb constellation map has more negative reward weighting than other constellations. Although the OneWeb constellation has fewer satellites than the StarlinkV2 constellation, the OneWeb constellation is at a higher altitude, meaning that its satellites will be illuminated for a longer portion of the night, and not just close to twilight. Therefore, OneWeb shows more negative weighting than StarlinkV2 though it has a smaller satellite population. To investigate whether the scheduler behaves how we expect with the new satellite weighting added we create a testing function that measures the length of satellite streaks in the simulated field of views. To ensure efficiency, only satellites that are above the altitude limit and illuminated by the sun will be considered. Satellites below the altitude limit (indicated in the gray region in Figure \ref{fig-simulated-scheduler}) can’t be observed in pointings and are therefore not included for efficiency. For each satellite, we first determine whether they are in the field of view for any given telescope pointing by calculating their distance from the center of the field of view. If their distance from the field of view is less than the radius of the field of view, the satellite has crossed through the pointing. To quantify the impact of the satellite on the pointing, we then project the satellite location as well as the pointing to a 2D x,y plane. In the 2D plane, the field of pointing becomes roughly a circle and the start and end locations of the satellite become two points on the plane. Using the shapely python library, we calculate the intersection length of the satellite location points and the circle. Therefore, with a given simulated satellite constellation and a schedule of observations, we record the number of satellites that occur in each field of view and measure how long the satellite streaks are. Using a realistic estimated satellite streak width of 50 pixels ($\sim$XXX arcsec), we can convert the streak length results into the number of affected image pixels, which allows us to quantitatively measure the efficiency of the dodging algorithm with pixel loss. 
 
 \section{Results}
-We begin by investigating the efficiency of the added weighting algorithm on dodging
-satellites in observations. As shown in Figure \ref{fig-pixel-loss-weight}, using a conservative estimate of 50 pixels as
-streak width, we found that higher dodging weights reduces pixels lost to satellite streaks. We
-also found that smaller constellations at lower orbital altitudes (StarlinkV1 for example)
-inherently results in less pixel loss per pointing, nearly independent of the dodging weight.
-Figure \ref{fig-pixel-loss-weight} shows that the added weighted dodging algorithm was able to effectively avoid satellite streaks in pointings.
+We begin by investigating the efficiency of the added weighting algorithm on dodging satellites in observations. As shown in Figure \ref{fig-pixel-loss-weight}, using a conservative estimate of 50 pixels as streak width, we found that higher dodging weights reduces pixels lost to satellite streaks. We also found that smaller constellations at lower orbital altitudes (StarlinkV1 for example) inherently results in less pixel loss per pointing, nearly independent of the dodging weight. Figure \ref{fig-pixel-loss-weight} shows that the added weighted dodging algorithm was able to effectively avoid satellite streaks in pointings.
 
 \begin{figure}[ht!]
 \plottwo{plots/streaklen_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
@@ -262,77 +196,37 @@ xxx--could stack these and share the x-axis. Need to fix the y-label getting cut
 \label{fig-pixel-loss-weight}}
 \end{figure}
 
-We then investigate the relationship between number of exposures taken and the dodging
-weight. As shown in Figure \ref{fig-pixel-loss-weight}, higher dodging weight results in fewer exposures, most likely due
-to longer slew times. With the additional avoidance weighting, the telescope may be prompted to
-slew to a location other than the desired pointing location and then slew back in order to avoid
-some satellites, resulting in fewer overall exposures. We also found that larger constellations like
-StarlinkV2 tend to decrease the number of exposures slightly more than smaller constellations
-(StarlinkV1), which is expected. More satellites or satellites at higher orbital altitudes result in
-bigger areas of avoidance on the sky, which results in more slewing to avoid the affected areas,
-which subsequently reduces exposures. \\
+We then investigate the relationship between number of exposures taken and the dodging weight. As shown in Figure \ref{fig-pixel-loss-weight}, higher dodging weight results in fewer exposures, most likely due to longer slew times. With the additional avoidance weighting, the telescope may be prompted to slew to a location other than the desired pointing location and then slew back in order to avoid some satellites, resulting in fewer overall exposures. We also found that larger constellations like StarlinkV2 tend to decrease the number of exposures slightly more than smaller constellations (StarlinkV1), which is expected. More satellites or satellites at higher orbital altitudes result in bigger areas of avoidance on the sky, which results in more slewing to avoid the affected areas, which subsequently reduces exposures. \\
 
-We now investigate the tradeoff between survey depth and satellite avoidance. One goal of LSST is to collect a large number of exposures of all parts of the southern sky so the
-exposures can be coadded to reveal faint structures that aren’t visible in individual images.
-Therefore, survey depth is crucial to LSST science goals and the trade off must be evaluated.
-With the satellite avoidance algorithm, the scheduler is prompted to avoid regions with
-illuminated satellites, which could result in longer slew time or less desirable pointing
-conditions, which contribute to a loss in survey depth. Therefore, we evaluate the tradeoff
-between survey depth loss and satellite avoidance using the dodging algorithm.\\
+We now investigate the tradeoff between survey depth and satellite avoidance. One goal of LSST is to collect a large number of exposures of all parts of the southern sky so the exposures can be coadded to reveal faint structures that aren’t visible in individual images. Therefore, survey depth is crucial to LSST science goals and the trade off must be evaluated. With the satellite avoidance algorithm, the scheduler is prompted to avoid regions with illuminated satellites, which could result in longer slew time or less desirable pointing conditions, which contribute to a loss in survey depth. Therefore, we evaluate the tradeoff between survey depth loss and satellite avoidance using the dodging algorithm.\\
 
 \begin{figure}[ht!]
-\epsscale{0.35}
-\plotone{plots/slv1coadd.pdf}
-\plotone{plots/slv2coadd.pdf}
-\plotone{plots/onewcoadd.pdf}
+\epsscale{0.7}
+%\plotone{plots/slv1coadd.pdf}
+%\plotone{plots/slv2coadd.pdf}
+%\plotone{plots/onewcoadd.pdf}\\
+\plotone{plots/streak_length_v_deltam.pdf}
 \epsscale{1}
-\caption{The trade off between pixels lost to streaks and final median coadded depth of the survey. Points to the right of the dashed line show improvement while those to the left signify the regained pixels do not adequatly compensate for the lost depth. In no situation are we able to prevent depth loss in at least some filters. \label{fig-trade-off}}
+\caption{The trade off between pixels lost to streaks and final median coadded depth of the survey. Points to the right of the dashed line show improvement while those to the left signify the regained pixels do not adequatly compensate for the lost depth. In no situation are we able to prevent depth loss in at least some filters. \label{fig-trade-off}
+XXX--the top panels have more info, but I kinda like the lower for the simplicity. Maybe just the lower and say all the filters follow a similar trend? Or a plot for g and a plot for i?
+xxx--MR deleted the top panels, and thinks we should avoid discussing filters/bands too much because people will ask whether we are simulating sat brightness as a function of wavelength... which we definitely aren't}
 \end{figure}
 
-As shown in Figure \ref{fig-trade-off} , for all three constellations, minor reduction in mean pixel loss per visit
-($0.001\%$ decrease) results in a significant decrease in median coadded depth. Currently, pixel
-loss due to satellite streaks only constitutes a very low percentage of total pixels in a pointing
-(about $0.008\%$ without any dodging). Given that the percentage is currently so small, a very
-minor reduction in mean pixel loss per visit results in significant reduction in image depth.
+As shown in Figure \ref{fig-trade-off} , for all three constellations, minor reduction in mean pixel loss per visit ($0.001\%$ decrease) results in a significant decrease in median coadded depth. Currently, pixel loss due to satellite streaks only constitutes a very low percentage of total pixels in a pointing (about $0.008\%$ without any dodging). Given that the percentage is currently so small, a very minor reduction in mean pixel loss per visit results in significant reduction in image depth.
 
 \section{Discussion and Conclusion}
 
-We have demonstrated that adding a weighted term in the scheduler algorithm for
-illuminated satellites can effectively reduce the amount of satellite streaks in observations, and
-subsequently reduce mean pixel loss per visit. This is shown in Figure \ref{fig-pixel-loss-weight} where all three
-constellations caused less pixel loss with increasing dodging weights. However, with the new
-added priority on dodging, the telescope can be pushed to take an observation path that does not
-optimize slew time, and subsequently reduces the number of exposures and overall survey depth.
-The tradeoff essentially comes down to the relationship between mean pixel loss
-reduction and survey depth reduction. If the amount of pixels saved outweighs the amount of
-survey depth lost, then the algorithm is valuable to be added to the scheduler. The tradeoff
-relationship is evaluated in Figure \ref{fig-trade-off}. We found that, for all three constellations, the tradeoff
-between reduction of pixel loss and loss in coadded image depth is so significant that satellite
-dodging is overwhelmingly not worth it, provided the simulated constellations we selected are
-representative of reality. Since each pointing contains such a large number of pixels, the number
-of pixels destroyed by satellite streaks constitutes a very small percentage of the overall image.
-Therefore, while the weighted dodging algorithm is effective at reducing satellite streaks in
-images, at the current stage, satellite avoidance is mostly unnecessary considering the trade-off
-between pixel loss and loss in overall survey depth.
+We have demonstrated that adding a weighted term in the scheduler algorithm for illuminated satellites can effectively reduce the amount of satellite streaks in observations, and subsequently reduce mean pixel loss per visit. This is shown in Figure \ref{fig-pixel-loss-weight} where all three constellations caused less pixel loss with increasing dodging weights. However, with the new added priority on dodging, the telescope can be pushed to take an observation path that does not optimize slew time, and subsequently reduces the number of exposures and overall survey depth. The tradeoff essentially comes down to the relationship between mean pixel loss reduction and survey depth reduction. If the amount of pixels saved outweighs the amount of survey depth lost, then the algorithm is valuable to be added to the scheduler. The tradeoff relationship is evaluated in Figure \ref{fig-trade-off}. We found that, for all three constellations, the tradeoff between reduction of pixel loss and loss in coadded image depth is so significant that satellite dodging is overwhelmingly not worth it, provided the simulated constellations we selected are representative of reality. Since each pointing contains such a large number of pixels, the number of pixels destroyed by satellite streaks constitutes a very small percentage of the overall image. Therefore, while the weighted dodging algorithm is effective at reducing satellite streaks in images, at the current stage, satellite avoidance is mostly unnecessary considering the trade-off between pixel loss and loss in overall survey depth.
+
+xxx--Add short statement about impacts on near-Earth object (NEO) searches, and also a figure that Peter will make.
+XXX--Add in the results from looking at a run with twilight NEO survey observations. I think it is a result that will help some folks calm down a bit that we aren't going to miss tons of killer asteroids even with large constellations.
 
 xxx--Maybe a table for estimated pixel/area losses for different things. Something like narrow streak mask, wide streak mask, chip gaps, and bright/saturated stars. 
 
+xxx--Consider saying something like only 10\% of images will have a streak from these three constellations, whereas Lawrence et al. 2022 says ``a majority''. Some of this is probably based on old Starlink info with higher altitudes.
+
 \section{Future Work}
-While the satellite dodging algorithm is mostly unnecessary for the three satellite
-constellations we considered, many astronomers estimate that there will be sharp increases in
-satellite population in the next 5–10 years, which notably overlaps the LSST operations period
-(2024–2035). With the dramatic increase in satellite population, the dodging algorithm might
-become more relevant. In addition, satellites from other operators may be significantly brighter
-than present-day Starlink and OneWeb satellites, and may saturate the LSST Camera’s detectors.
-In this scenario, dodging may be required to salvage some science, even if it means losing out on
-survey depth.
-Related to this, one future work direction involves adding in brightness weighting to the
-dodging algorithm. The idea is to only avoid satellites brighter than a certain brightness
-threshold. This could potentially reduce the region of avoidance, therefore reducing the loss in
-coadded depth — it could reduce the tradeoff between pixel loss and loss in survey depth,
-making this preliminary work directly relevant for a successful LSST. Finally, it may be possible
-to compute optimal starting locations for observation schedules based on predicted satellite maps
-in order to optimize satellite avoidance.
+While the satellite dodging algorithm is mostly unnecessary for the three satellite constellations we considered, many astronomers estimate that there will be sharp increases in satellite population in the next 5–10 years, which notably overlaps the LSST operations period (2024–2035). With the dramatic increase in satellite population, the dodging algorithm might become more relevant. In addition, satellites from other operators may be significantly brighter than present-day Starlink and OneWeb satellites, and may saturate the LSST Camera’s detectors. In this scenario, dodging may be required to salvage some science, even if it means losing out on survey depth. Related to this, one future work direction involves adding in brightness weighting to the dodging algorithm. The idea is to only avoid satellites brighter than a certain brightness threshold. This could potentially reduce the region of avoidance, therefore reducing the loss in coadded depth — it could reduce the tradeoff between pixel loss and loss in survey depth, making this preliminary work directly relevant for a successful LSST. Finally, it may be possible to compute optimal starting locations for observation schedules based on predicted satellite maps in order to optimize satellite avoidance.
 
 
 
