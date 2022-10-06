@@ -123,7 +123,7 @@
 \begin{abstract}
 Best abstract ever
 
-XXX--bottom line. Even in the case of multiple megaconstellations ion orbit, we expect Rubin would only lose $\sim$0.02\% of science pixels to streaks. Given reasonable predicitons of satellite orbits we find we can reduce losses by a factor of 2 with minimal impact to the survey science goals. Twilight observations at high airmass with no scheduling mitigation could see pixel losses up to 0.06\%. 
+XXX--bottom line. Even in the case of multiple mega constellations in orbit, we expect Rubin would only lose $\sim$0.02\% of science pixels to streaks. Given reasonable satellite orbit predictions we find we can reduce pixel losses by a factor of 2 with minimal impact to the survey science goals. Even so, the tiny fraction of pixels lost makes mitigation strategies unnecessary. Twilight observations at high airmass with no scheduling mitigation could see pixel losses up to 0.06\%. 
 \end{abstract}
 
 %% Keywords should appear after the \end{abstract} command. 
@@ -140,8 +140,7 @@ Vera C. Rubin Observatory's Legacy Survey of Space and Time (LSST) is a ten-year
 
 To accomplish this, there is a complex scheduler algorithm that takes into account various science priorities, including slew time, survey uniformity, and image depth \citep{naghib19}. The Rubin Scheduler algorithm creates weightings for various science priorities and uses the weighting to create a path for pointing observation.
 
-However, one challenge for the LSST is that increasing numbers of bright Low-Earth-Orbit (LEO) satellites (e.g., Starlink) are being launched, which could leave streaks in astronomical pointings. Over the last three years, many astronomers have raised concerns
-about the impact of this on the LEO ecosystem and astronomical surveys \citep{lawrence22,tyson20}. LEO satellites are visible from Earth because they reflect sunlight, especially during twilight. As the illuminated LEO satellites move across the field of view of an astronomical pointing, they leave a streak in the image, which negatively impacts the scientific value of the pointing.
+However, one challenge for the LSST is that increasing numbers of bright Low-Earth-Orbit (LEO) satellites (e.g., Starlink) are being launched, which could leave streaks in astronomical pointings. Over the last three years, many astronomers have raised concerns about the impact of this on the LEO ecosystem and astronomical surveys \citep{lawrence22,tyson20}. LEO satellites are visible from Earth because they reflect sunlight, especially during twilight. As the illuminated LEO satellites move across the field of view of an astronomical pointing, they leave a streak in the image, which negatively impacts the scientific value of the pointing.
 
 XXX--\citet{tyson20} used a very simple algorithm to try and avoid satellite streaks.  In this paper, rather than try to avoid all satellite streaks, we incorporate satellite avoidance as a component on the scheduler's Markov Decision Process, allowing us to avoid a large fraction of satellite streaks without significantly compromising the performance of the survey. 
 
@@ -173,7 +172,7 @@ Using these simulated satellite constellations, we add an additional weighting f
 
 XXX--quantify the basis function maps a bit more. The positions of the illuminated satellites are computed in 10s intervals. These maps are then summed over 90 minute blocks to generate an avoidance map. 
 
-XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. Maybe add a zonodo to the repo so we can cite where we got the baseline simulation from.
+XXX--I'll add some text describing the baseline scheduler that we use--note that we only run for the first year. As a starting point we use the baseline scheduler simulation in \citet{yoachim2022}.
 
 \begin{figure}[ht!]
 \epsscale{0.37}
@@ -193,7 +192,7 @@ We begin by investigating the efficiency of the added weighting algorithm on dod
 \plottwo{plots/streaklen_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
 \plottwo{plots/nexp_v_weight.pdf}{plots/deltam_v_weight.pdf}
 \caption{Results from simulating the first year of Rubin observations in the presence of different satellite constellations and varying how strongly the scheduler attempts to avoid satellites.  Top panels show that, as expected, the number of streaks and mean streak length decrease as more emphasis is put on satellite dodging. Bottom panels show the resulting trade off, as avoiding satellites forces the scheduler to make longer slews and observe less desirable parts of the sky, resulting in fewer total exposures in the first year and a shallower median coadded depth in $g$.
-xxx--could stack these and share the x-axis. Need to fix the y-label getting cut off.
+xxx--could stack these and share the x-axis. 
 \label{fig-pixel-loss-weight}}
 \end{figure}
 
@@ -213,7 +212,7 @@ As shown in Figure \ref{fig-trade-off} , for all three constellations, minor red
 \begin{figure}
     \centering
     \plottwo{plots/temp/opsim_Count_night_night_lt_366_and_visitExposureTime_lt_20_HEAL_SkyMap.pdf}{plots/twilight_curves.pdf}
-    \caption{Impact of streaks on twilight NEO observations that can not easily be shifted to dodge satellites.}
+    \caption{Impact of streaks on twilight NEO observations that can not easily be shifted to dodge satellites. Left panel shows the altitude, azimuth distribution of NEO observations in a recent survey simulation. The right panel shows the number of streaks that would result from different satellite constellations as a function of observation altitude. The legend includes an estimate of the pixel loss percentage for NEO observations assuming a 50 pixel wide mask is used. }
     \label{fig:twi_neo}
 \end{figure}
 
@@ -228,6 +227,10 @@ XXX--Add in the results from looking at a run with twilight NEO survey observati
 xxx--Maybe a table for estimated pixel/area losses for different things. Something like narrow streak mask, wide streak mask, chip gaps, and bright/saturated stars. 
 
 xxx--Consider saying something like only 10\% of images will have a streak from these three constellations, whereas Lawrence et al. 2022 says ``a majority''. Some of this is probably based on old Starlink info with higher altitudes.
+
+We find larger constellations will only leave streaks on $\sim10$\% of Rubin images. This is a much lower value than previous studies \citep{lawrence22, tyson20}. This is partly due to the latest Starlink plans not including higher altitude orbits that were included in the \citet{tyson} study. % And partly due to not conflating twilight observations with the whole survey.
+
+XXX--While satellite streaks are poised to be a nuisance to Rubin observations, it is important to remember 1) They do not saturate detectors, 2) Do not leave streaks when in earth's shadow, 3) 
 
 \section{Future Work}
 While the satellite dodging algorithm is mostly unnecessary for the three satellite constellations we considered, many astronomers estimate that there will be sharp increases in satellite population in the next 5–10 years, which notably overlaps the LSST operations period (2024–2035). With the dramatic increase in satellite population, the dodging algorithm might become more relevant. In addition, satellites from other operators may be significantly brighter than present-day Starlink and OneWeb satellites, and may saturate the LSST Camera’s detectors. In this scenario, dodging may be required to salvage some science, even if it means losing out on survey depth. Related to this, one future work direction involves adding in brightness weighting to the dodging algorithm. The idea is to only avoid satellites brighter than a certain brightness threshold. This could potentially reduce the region of avoidance, therefore reducing the loss in coadded depth — it could reduce the tradeoff between pixel loss and loss in survey depth, making this preliminary work directly relevant for a successful LSST. Finally, it may be possible to compute optimal starting locations for observation schedules based on predicted satellite maps in order to optimize satellite avoidance.
