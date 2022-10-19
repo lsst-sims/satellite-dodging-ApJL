@@ -215,7 +215,6 @@ As shown in Figure \ref{fig-trade-off}, for all three constellations, minor redu
 
 \begin{figure}
     \centering
-    % oof, I can't figure out how to force the contour plots to be rasterized. 
     \epsscale{.8}
     \plottwo{plots/temp/opsim_Count_night_night_lt_366_and_visitExposureTime_gt_20_HEAL_SkyMap.pdf}{plots/regular_curves.pdf}
     \plottwo{plots/temp/opsim_Count_night_night_lt_366_and_visitExposureTime_lt_20_HEAL_SkyMap.pdf}{plots/twilight_curves.pdf}
@@ -234,7 +233,7 @@ XXX--Add in the results from looking at a run with twilight NEO survey observati
 
 xxx--Maybe a table for estimated pixel/area losses for different things. Something like narrow streak mask, wide streak mask, chip gaps, and bright/saturated stars. 
 
-xxx--Consider saying something like only 10\% of images will have a streak from these three constellations, whereas Lawrence et al. 2022 says ``a majority''. Some of this is probably based on old Starlink info with higher altitudes.
+xxx--Consider saying something like only 10\% of images will have a streak from these three constellations, whereas Lawrence et al. 2022 says ``a majority''. Some of this is probably based on old Starlink info with higher altitudes. It is correct, however, that twilight/low altitude observing campaigns will have a majority of images with streaks. The pixel loss impact is small either way.
 
 We find larger constellations will only leave streaks on $\sim10$\% of Rubin images. This is a much lower value than previous studies \citep{lawrence22, tyson20}. This is partly due to the latest Starlink plans not including higher altitude orbits that were included in the \citet{tyson20} study. % And partly due to not conflating twilight observations with the whole survey.
 
@@ -246,7 +245,9 @@ XXX-maybe just fold Future Work in with conclusions. I'm not sure we have a ton 
 
 While the satellite dodging algorithm is mostly unnecessary for the three satellite constellations we considered, many astronomers estimate that there will be sharp increases in satellite population in the next 5–10 years, which notably overlaps the LSST operations period (2024–2035). With the dramatic increase in satellite population, the dodging algorithm might become more relevant. In addition, satellites from other operators may be significantly brighter than present-day Starlink and OneWeb satellites, and may saturate the LSST Camera’s detectors. In this scenario, dodging may be required to salvage some science, even if it means losing out on survey depth. Related to this, one future work direction involves adding in brightness weighting to the dodging algorithm. The idea is to only avoid satellites brighter than a certain brightness threshold. This could potentially reduce the region of avoidance, therefore reducing the loss in coadded depth — it could reduce the tradeoff between pixel loss and loss in survey depth, making this preliminary work directly relevant for a successful LSST. Finally, it may be possible to compute optimal starting locations for observation schedules based on predicted satellite maps in order to optimize satellite avoidance.
 
+% TODO: write about impact of dodging ~1 thing per night that is super bright (e.g., BlueWalker 3)
 
+% TODO: write about how accurate satellite forecasting is essential... so if we ever did need to implement dodging, we would need accuracy to within a degree or so in space and within a few minutes in time (higher time accuracy needed for dodging specific super-bad/bright sats)
 
 
 
