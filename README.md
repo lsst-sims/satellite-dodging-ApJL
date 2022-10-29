@@ -9,10 +9,6 @@ The satellite dodging implementation is hosted at the LSST rubin sim repository:
 
 #### Dependencies: 
 A fresh conda environment for installing dependencies is highly recommended: 
-  ```
-  conda create -n sat-env 
-  conda activate sat-env
-  ```
 * Rubin sims: 
     ```
     conda create -n rubin -c conda-forge rubin_sim # Create a new environment
