@@ -25,3 +25,7 @@ To create the figures 1,2,3,4,5 in this paper, navigate to the plots folder.
 * Figure 2 is created using basis_func_examples.ipynb. 
 * Figure 3 and 4 are created in compare_sim_runs.ipynb. 
 * Figure 5 is created in twilight_neo.ipynb. 
+
+## Acknowledgement 
+The project began as a project under the Distributed Research Experiences for Undergraduates (DREU) program sponsored by the Computing Research Association-Widening Participation. This work was facilitated through the use of advanced computational, storage, and networking infrastructure provided by the Hyak supercomputer system at the University of Washington.
+
