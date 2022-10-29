@@ -24,4 +24,8 @@ A fresh conda environment for installing dependencies is highly recommended:
 * skyfield:  `pip install skyfield`
 
 #### Generating Figures: 
-To create the figures 1,2,3,4,5 in this paper, navigate to the plots folder. Figure 1 is created using constellation_examples.ipynb and satellite_util_examples.ipynb. Figure 2 is created using basis_func_examples.ipynb. Figure 3 and 4 are created in compare_sim_runs.ipynb. Figure 5 is created in twilight_neo.ipynb. 
+To create the figures 1,2,3,4,5 in this paper, navigate to the plots folder. 
+* Figure 1 is created using constellation_examples.ipynb and satellite_util_examples.ipynb. 
+* Figure 2 is created using basis_func_examples.ipynb. 
+* Figure 3 and 4 are created in compare_sim_runs.ipynb. 
+* Figure 5 is created in twilight_neo.ipynb. 
