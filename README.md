@@ -9,13 +9,17 @@ The satellite dodging implementation is hosted at the LSST rubin sim repository:
 
 #### Dependencies: 
 A fresh conda environment for installing dependencies is highly recommended: 
-  `conda create -n sat-env 
-  conda activate sat-env`
+  ```
+  conda create -n sat-env 
+  conda activate sat-env
+  ```
 * Rubin sims: 
-    `conda create -n rubin -c conda-forge rubin_sim # Create a new environment
+    ```
+    conda create -n rubin -c conda-forge rubin_sim # Create a new environment
     conda activate rubin
     rs_download_data  # Downloads ~2Gb of data to $RUBIN_SIM_DATA_DIR (~/rubin_sim_data if unset)
-    conda install -c conda-forge jupyter # Optional install of jupyter`
+    conda install -c conda-forge jupyter # Optional install of jupyter
+    ```
 * shapely: `conda install -c conda-forge shapely`
 * skyfield:  `pip install skyfield`
 
