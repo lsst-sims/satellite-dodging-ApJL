@@ -1,0 +1,442 @@
+\documentclass[twocolumn]{aastex631}
+
+%% \documentclass[arguments]{aastex631}
+%% 
+%% where the layout options are:
+%%
+%%  twocolumn   : two text columns, 10 point font, single spaced article.
+%%                This is the most compact and represent the final published
+%%                derived PDF copy of the accepted manuscript from the publisher
+%%  manuscript  : one text column, 12 point font, double spaced article.
+%%  preprint    : one text column, 12 point font, single spaced article.  
+%%  preprint2   : two text columns, 12 point font, single spaced article.
+%%  modern      : a stylish, single text column, 12 point font, article with
+%% 		          wider left and right margins. This uses the Daniel
+%% 		          Foreman-Mackey and David Hogg design.
+%%  RNAAS       : Suppresses an abstract. Originally for RNAAS manuscripts 
+%%                but now that abstracts are required this is obsolete for
+%%                AAS Journals. Authors might need it for other reasons. DO NOT
+%%                use \begin{abstract} and \end{abstract} with this style.
+%%
+%% Note that you can submit to the AAS Journals in any of these 6 styles.
+%%
+%% There are other optional arguments one can invoke to allow other stylistic
+%% actions:
+%%
+%%   astrosymb    : Loads Astrosymb font and define \astrocommands. 
+%%   tighten      : Makes baselineskip slightly smaller, only works with 
+%%                  the twocolumn substyle.
+%%   times        : uses times font instead of the default
+%%   linenumbers  : turn on lineno package.
+%%   trackchanges : required to see the revision mark up and print its output
+%%   longauthor   : Do not use the more compressed footnote style (default) for 
+%%                  the author/collaboration/affiliations. Instead print all
+%%                  affiliation information after each name. Creates a much 
+%%                  longer author list but may be desirable for short 
+%%                  author papers.
+%% twocolappendix : make 2 column appendix.
+%%   anonymous    : Do not show the authors, affiliations and acknowledgments 
+%%                  for dual anonymous review.
+
+\newcommand{\vdag}{(v)^\dagger}
+\newcommand\aastex{AAS\TeX}
+\newcommand\latex{La\TeX}
+
+%\received{March 1, 2021}
+%\revised{April 1, 2021}
+%\accepted{\today}
+
+%\submitjournal{ApJL}
+
+
+\begin{document}
+
+\title{Satellite Constellation Avoidance with the Rubin Observatory Legacy Survey of Space and Time}
+
+\author[0000-0002-8400-1910]{Jinghan Alina Hu}
+\affiliation{Harvey Mudd College, Claremont, CA, USA}
+\author[0000-0003-1305-7308]{Meredith L. Rawls}
+\affiliation{Department of Astronomy / DiRAC / Vera C. Rubin Observatory, University of Washington, Seattle, WA, USA}
+\author[0000-0003-2874-6464]{Peter Yoachim}
+\affiliation{Department of Astronomy / DiRAC / Vera C. Rubin Observatory, University of Washington, Seattle, WA, USA}
+\author[0000-0001-5250-2633]{\v{Z}eljko Ivezi\'{c}}
+\affiliation{Department of Astronomy / DiRAC / Vera C. Rubin Observatory, University of Washington, Seattle, WA, USA}
+
+
+\begin{abstract}
+We investigate a novel satellite avoidance strategy to mitigate the impact of large commercial satellite constellations in low-Earth orbit on the Vera C. Rubin Observatory Legacy Survey of Space and Time (LSST). We simulate the orbits of currently planned Starlink and OneWeb constellations ($\sim$40,000 satellites) to test how effectively an upgraded Rubin scheduler algorithm can avoid them, and assess how the overall survey is affected.
+Given a reasonably accurate satellite orbit forecast, we find it is possible to adjust the scheduler algorithm to effectively avoid some satellites. Overall, sacrificing 10\% of LSST observing time to avoid satellites reduces the fraction of LSST visits with streaks by a factor of two. Whether such a mitigation will be required depends on the overall impact of streaks on science, which is not yet well quantified. This is due to a lack of adequate information about satellite brightness distributions as well as the impact of glints and low surface brightness residuals on alert purity and systematic errors in cosmological parameter estimation. A significant increase in the number of satellites or their brightness during Rubin Operations may make implementing this satellite avoidance strategy worthwhile.
+\end{abstract}
+
+%With both of these satellite constellations fully deployed, and with no satellite avoidance strategy, the LSST would lose $\sim$0.12\% of science pixels to satellite streaks, assuming a typical streak width of 300 pixels, while high-airmass twilight observations would lose $\sim$0.36\% of science pixels.
+
+%% Keywords should appear after the \end{abstract} command. 
+%% The AAS Journals now uses Unified Astronomy Thesaurus concepts:
+%% https://astrothesaurus.org
+%% You will be asked to selected these concepts during the submission process
+%% but this old "keyword" functionality is maintained in case authors want
+%% to include these concepts in their preprints.
+\keywords{Ground-based astronomy, Light pollution, Sky surveys, Artificial Satellites}
+
+
+\section{Introduction} \label{sec:intro}
+
+Rubin Observatory's Legacy Survey of Space and Time (LSST) is a ten-year astronomical imaging survey that will begin in 2024 from a new telescope under construction in Chile. Instead of soliciting individual requests for what the telescope should observe, the LSST will uniformly survey the sky every few nights using six color filters to create a decade-long high-resolution survey of the entire southern sky, and share massive quantities of data products with the astronomy community \citep{overview}. To accomplish this, the LSST will employ a scheduling algorithm that uses a modified Markov Decision Process which can generate lists of desirable observations in real time \citep{naghib19}. The LSST scheduler balances the desire to minimize slew time, optimize signal to noise in individual images, and to maintain survey footprint uniformity.
+
+One challenge for the LSST is that increasing numbers of bright low-Earth orbit (LEO) satellites (e.g., Starlink) are being launched, which may leave streaks in astronomical pointings. LEO satellites are visible from Earth because they reflect sunlight, especially during twilight. As the Sun-illuminated satellites move across the field of view of an astronomical pointing, they leave a streak in the image. While the flux from satellite streaks can in many cases be identified and removed, the resulting pixels have much lower signal-to-noise. For a thorough discussion of the scientific utility of residual light after masking satellite trails, see \citet{hasan22}. Over the last three years, many astronomers have raised concerns about the impact of the proliferation of commercial satellites on the LEO ecosystem and astronomical surveys \citep{lawrence22,tyson20}. In addition, astronomers have come together with satellite operators and other stakeholders to create recommendations and strategies to mitigate impacts to observational astronomy and beyond \citep{satcon1,satcon2,dqs1,dqs2}.
+
+\citet{tyson20} used a very simple algorithm to see if the LSST could avoid imaging satellite streaks. They concluded that attempting to naively dodge of order 48,000 LEO satellites is useless because it is operationally inefficient.
+In this paper, rather than try to avoid all satellite streaks, we incorporate satellite avoidance as a component of the LSST scheduler's Markov Decision Process. This allows us to avoid a significant fraction of satellite streaks and investigate what level of avoidance might be acceptable because it does not drastically impact the overall performance of the LSST.
+
+There are other efforts underway to mitigate the impact of satellite streaks in astronomical images. For example, satellite companies like SpaceX have worked on darkening the exterior of satellites so they will be less visible\footnote{\url{https://api.starlink.com/public-files/BrightnessMitigationBestPracticesSatelliteOperators.pdf}}. However, even with the most effective darkening mitigations to date, satellites still appear bright to the LSST Camera, and are likely to cause effects like non-linear crosstalk or glints that are challenging to correct with the LSST Science Pipelines software and may introduce systematic biases or spurious detections. This is discussed in more detail in \citet{tyson20} and on the Rubin Observatory LSST Project website\footnote{\url{https://ls.st/satcon}}. Astronomers have also developed algorithms for masking satellite trails in images, but covering the outer wings of the trails without losing extra pixels remains a challenge \citep{hasan22}. The rapid increase in population of LEO satellites threatens to compromise the quality and scientific value of LSST images and also requires extra human and computer resources to effectively mask trails. Thus, we explore an additional option: incorporating the orbits of known commercial satellites into the LSST scheduler so the worst of them may be avoided.
+
+In this paper, we first create realistic simulated forecasts of satellite orbits in Section \ref{method}. We then build a tool that uses that data to create new scheduler constraints, and test the impact of the modified scheduler algorithm on LSST observing programs in Section \ref{results}. Finally, we discuss the resulting trade-off between number of streaks and reduced survey depth that results from avoiding satellites in Section \ref{discuss}, and lay out possibilities for the future as the satellite population changes during Rubin Operations. We also make available a GitHub repository with the data and software necessary to reproduce the paper's figures\footnote{\url{https://github.com/lsst-sims/satellite-dodging-ApJL}}.
+
+
+\section{Methods}\label{method}
+
+We begin by creating realistic forecasts of three commercial satellite constellations, which are illustrated in Figure~\ref{fig-simulated-constellations}. These are Starlink Gen1 (4,408 satellites, altitude $540-570$ km), OneWeb (6,372 satellites, altitude 1200 km), and Starlink Gen2 (29,988 satellites, altitude $340-614$ km). Each constellation uses orbital inclinations and number of satellite planes matching current plans\footnote{\url{https://ls.st/x1o}}. To date, OneWeb has launched and deployed several hundred satellites, while the number of Starlink satellites is in the thousands.
+
+\begin{figure*}[ht!]
+\epsscale{0.35}
+\plotone{plots/starlinkv1.pdf}
+\plotone{plots/starlinkv2.pdf}
+\plotone{plots/oneweb.pdf}\\
+\plotone{plots/sats_slv1.pdf}
+\plotone{plots/sats_slv2.pdf}
+\plotone{plots/sats_ow.pdf}\\
+\plotone{plots/sats_slv1_late.pdf}
+\plotone{plots/sats_slv2_late.pdf}
+\plotone{plots/sats_ow_late.pdf}
+\epsscale{1}
+\caption{Three simulated satellite constellations, one per column. Starlink Gen1 is 4,408 satellites, Starlink Gen2 is 29,988 satellites, and OneWeb is 6,372 satellites, for a grand total of 40,768. The top row shows the 3D distribution of each constellation around Earth. The middle row shows an instantaneous Hammer projection of the altitude and azimuth positions of each constellation as seen from Rubin Observatory on October 1, 2023 during twilight (Sun altitude $-18$ degrees). Blue points are satellites illuminated by the Sun at this time, red points are satellites not illuminated by the Sun, and black points are satellites that are both illuminated and above the Rubin 20 degree altitude pointing limit. The bottom row is the same Hammer projections six hours later in the middle of the night (Sun altitude $-50$ degrees). Because Starlink satellites orbit at 550 km, none are illuminated in the middle of the night at this time of year. The OneWeb constellation at 1200 km has only a single illuminated satellite above the Rubin altitude limit at this particular time.
+\vspace{4em}
+\label{fig-simulated-constellations}
+}
+\end{figure*}
+
+To simulate LSST observations, we start with the baseline observing strategy in \citet{yoachim2022b}. LSST observations are scheduled in visits, where a $u$ visit is one 30s exposure and visits in all other filters ($grizy$) are back-to-back 15s exposures. The baseline strategy attempts to take most observations in mixed filter pairs (e.g., an $r$\ visit followed by an $i$ visit 33 minutes later), and completes 215,000 visits in the first year. 
+
+The baseline LSST observing strategy uses three primary basis functions which reward (1) minimizing slewtime, (2) maximizing the depth of images (e.g., by avoiding the Moon and high airmass), and (3) maintaining a uniform survey footprint. To this, we add a fourth basis function which penalizes observing areas of the sky which will have high concentrations of illuminated satellites. Figure~\ref{fig-simulated-scheduler} shows an example of this new basis function for the three simulated satellite constellations. The positions of the illuminated satellites are computed in 10-second intervals and marked on the sky. These maps are then summed over 90-minute blocks to generate the basis function maps. Thus our modified scheduler with a satellite avoidance strategy does not try to avoid individual satellite streaks, but rather has a parameterized method for avoiding regions of the sky where satellite streaks are more likely. This has the additional benefit of not requiring high precision satellite orbit forecasts.
+
+\begin{figure*}[ht!]
+\epsscale{0.37}
+\plotone{plots/starlink_tles_v1_0_00_basisfunc.pdf}
+\plotone{plots/starlink_tles_v2_0_00_basisfunc.pdf}
+\plotone{plots/oneweb_tles_0_00_basisfunc.pdf}
+\epsscale{1}
+\caption{Satellite avoidance maps constructed for the Rubin scheduler for each simulated constellation. Each is for a twilight observation period of 90 minutes (beginning after sunset with a Sun altitude of $-17.1$ degrees). The map projections are rotated so zenith is in the center of the image. Darker regions have more illuminated satellites and therefore more negative weighting. By varying the dodging weight placed on these maps, the scheduler will more actively avoid regions of the sky where satellites could streak images.
+%\vspace{3em}
+\label{fig-simulated-scheduler}
+}
+\end{figure*}
+
+We show three example satellite avoidance maps ready for use by the LSST scheduler in Figure \ref{fig-simulated-scheduler}. It is apparent from Figure \ref{fig-simulated-scheduler} that the simulated OneWeb constellation has more negative area --- regions that should be avoided due to large numbers of illuminated satellites --- than the other two constellations. Although OneWeb has fewer satellites than Starlink Gen2, the OneWeb satellites orbit at a higher altitude (1200 km compared to 340-614 km for Starlink), meaning that they will be illuminated for a longer portion of the night, and also have a larger impact close to twilight. This is why one of the recommendations from \citet{satcon1} is to keep LEO satellites below 600 km altitude.
+
+To investigate whether the scheduler behaves how we expect with the new satellite avoidance strategy, we create a testing function that measures the length of satellite streaks in the simulated fields of view. To ensure efficiency, only satellites that are above the altitude limit and illuminated by the Sun are considered. Satellites below the altitude limit (indicated in the gray region in Figure \ref{fig-simulated-scheduler}) cannot be reached by the Simonyi Survey Telescope and are therefore not included. For each satellite, we first determine whether it is in the field of view for a given pointing by calculating their distance from the center of the field of view. If this distance is less than the radius of the field of view, the satellite has crossed through the pointing. To quantify the impact of the satellite on the pointing, we then project both the satellite location and the pointing to a 2D x,y plane. In this plane, the field of view is roughly circular and the start and end locations of the satellite crossing are two points on the plane, and we can calculate the total intersection length. Therefore, given a simulated satellite constellation and a schedule of observations, we are able to record the number of satellites in each pointing and measure the total streak length. We assume that 
+the impact of streaks on science is proportional to their total length, which allows us to quantify the efficiency of the satellite avoidance strategy. 
+
+To estimate the fraction of pixels affected by streaks, following \citet{hasan22} we adopt a fiducial width of 300 pixels (equivalent to 1 arcminute given the plate scale of 0.2 arcseconds per pixel). The 3.5 degree diameter Rubin focal plane is populated with 189 4kx4k CCDs. Assuming a length of 15 CCDs (with a CCD side of 4096 pixels), a single streak corresponds to 0.6\% of all the pixels in the focal plane. On the other hand, if a streak is so bright that entire CCDs are rendered scientifically useless, a single streak would wipe out 8\% of all pixels in the focal plane. 
+
+We simulate observations for only the first year of the planned ten-year LSST, as the survey strategy does not significantly change in later years. We acknowledge this does not account for the likely satellite population increase beyond the three simulated constellations; however, our results should scale linearly to larger future constellations in similar orbital distributions. We do not consider the effects of satellites launching or de-orbiting, and for simplicity we assume each satellite's orbital parameters are constant. This should be an acceptable approximation as long as actual satellite orbital parameters are available $\sim1$\ day in advance so our avoidance basis functions can be constructed. If there is no timely information publicly available on LEO satellite constellation orbits, or it is highly inaccurate, the satellite avoidance strategy would be impossible to implement. We estimate that satellite orbital solutions correct to within about a degree in space and to within a few minutes in time would be sufficient to effectively avoid some regions of the sky with more satellites in large constellations. Observing current Starlink satellites, \citet{Halferty2022} find they can construct TLEs which predict positions with sub-degree spatial precision and sub-second temporal precision which is more than adequate for our proposed satellite avoidance methods.
+
+
+\section{Results}\label{results}
+
+We find that higher dodging weights reduces pixels lost to satellite streaks, and that the satellite avoidance algorithm is able to effectively avoid satellite streaks in simulated pointings. This is shown in the top two panels of Figure \ref{fig-pixel-loss-weight}. We also find that smaller constellations at lower orbital altitudes (Starlink Gen1, for example) inherently cause less pixel loss per pointing, nearly independent of the dodging weight.
+
+\begin{figure*}[ht!]
+\plottwo{plots/streaklen_v_weight.pdf}{plots/streakfrac_v_weight.pdf}
+\plottwo{plots/nexp_v_weight.pdf}{plots/deltam_v_weight.pdf}
+\epsscale{1.2}
+\caption{Illustration of changes in the mean streak length in all visits including those with no streak (top left), the fraction of visits with streaks
+(top right), the number of acquired visits in year 1 (bottom left) and coadded depth in the $g$ band (bottom right) as a function of dodging basis function weight (starting with essentially no dodging on the left). 
+Note that to reduce the fraction of visits with streaks by about a factor of two, satellite avoidance will require 10\% of total observing time.
+\vspace{3em}
+\label{fig-pixel-loss-weight}}
+\end{figure*}
+
+Next, we investigate the relationship between the number of exposures the scheduler is able to complete as a function of the dodging weight. As shown in the bottom two panels of Figure \ref{fig-pixel-loss-weight}, higher dodging weight results in fewer visits, most likely due to longer slew times. With a higher dodging weight, the telescope may be prompted to slew to a location other than the most desirable nearby pointings, resulting in fewer overall exposures. We also find that a larger constellation (Starlink Gen2) tends to decrease the number of exposures slightly more than a smaller constellation (Starlink Gen1), which is expected. More satellites or satellites at higher orbital altitudes result in larger areas of avoidance on the sky, which leads to more slewing required to avoid the affected areas, which subsequently reduces the total number of visits. In addition to forcing longer slews, avoiding satellite dense areas pushes the scheduler to observe pointings with lower signal to noise (e.g., higher airmass, brighter sky background areas) than it normally would.
+
+One important LSST survey goal is to collect a large number of exposures of the whole southern sky so these may be co-added to reveal faint structures that are not visible in individual visits. As a result, survey depth is crucial to LSST science, and the trade-off between pixel loss from satellite streaks versus survey depth reduction from fewer total visits must be evaluated. With the satellite avoidance algorithm, the scheduler is prompted to avoid regions with illuminated satellites, which sometimes results in longer slew times or less desirable pointing conditions and contributes to a loss in survey depth. Therefore, Figure \ref{fig-trade-off} explores the trade-off between survey depth loss and satellite avoidance. As evident
+from the figure, the fraction of LSST visits with streaks can be decreased by a factor of two with 
+an investment of 10\% of LSST observing time, corresponding to a loss of coadded depth of 0.05 mag. 
+
+\begin{figure}[ht!]
+\plotone{plots/streak_length_v_streakl.pdf}
+\epsscale{1.5}
+\caption{The trade-off between the mean streak length and final median co-added depth in $g$ band for one year of the LSST (controlled by dodging basis function weight). A negative change in co-added depth indicates the survey is shallower. 
+%\vspace{3em}
+\label{fig-trade-off}}
+\end{figure}
+
+So far, we have primarily considered impacts on the overall LSST. However, another important LSST science goal involves using twilight images to search for Near Earth Objects (NEOs) and solar system objects interior to the orbits of Earth and Venus. These observations must be taken in the direction of the rising or setting sun at high airmass. Because a small potential area is targeted, our proposed satellite avoidance scheme is ineffective. Figure~\ref{fig:twi_neo} shows how regular survey observations and twilight NEO observations would be affected by satellite constellations using the LSST scheduler with no satellite avoidance.  While the majority of twilight NEO observations could include a satellite streak with a Starlink Gen2 size constellation, we find this would only result in a $\sim$0.36\% loss of science pixels (for a 1 arcminute wide mask).
+
+\begin{figure*}
+\centering
+\epsscale{.85}
+\plottwo{plots/temp/opsim_Count_night_night_lt_366_and_visitExposureTime_gt_20_HEAL_SkyMap.pdf}{plots/regular_curves.pdf}
+\plottwo{plots/temp/opsim_Count_night_night_lt_366_and_visitExposureTime_lt_20_HEAL_SkyMap.pdf}{plots/twilight_curves.pdf}
+\epsscale{1}
+\caption{Impacts of satellite streaks on simulated LSST observations without any satellite avoidance. Compared to standard LSST observations (top), twilight NEO observations (bottom) cannot easily be shifted to avoid satellites. The left panels show the altitude and azimuth distribution of observations on the sky (zenith at the center of the plots), and the right panels show how many streaks would result from the three simulated satellite constellations as a function of how high above the horizon the telescope is pointing (observation altitude). Note that  most twilight NEO observations would contain a satellite streak.
+%\vspace{3em}
+\label{fig:twi_neo}}
+\end{figure*}
+
+
+\section{Discussion}\label{discuss}
+
+We have demonstrated that adding a weighted term in the scheduler algorithm for illuminated satellites can effectively reduce the amount of satellite streaks in observations, and subsequently reduce mean pixel loss per visit and other impacts on science, as illustrated in Figure \ref{fig-pixel-loss-weight}. 
+However, with the new added priority on satellite avoidance, the telescope can be pushed to take an observation path that does not optimize slew time, which subsequently reduces the number of exposures and overall survey depth. The trade-off essentially comes down to the relationship between total streak length reduction and survey depth reduction. The final decision will depend on the overall impact of streaks on science which is not well quantified yet due to a lack of adequate information about the satellite brightness distribution and the impact of glints and low surface brightness residuals on alert purity and systematic errors in cosmological parameter estimation. In other words, 
+when evaluating whether to implement a weighted satellite avoidance strategy to effectively reduce satellite streak density, it is necessary to evaluate the trade-off between pixel loss together with non-linear crosstalk, time-domain glint effects, and any other relevant systematics versus loss in observing time. 
+
+We note that earlier publications \citep{lawrence22,tyson20} stated that the majority of LSST images are likely to contain a satellite streak. They also included some higher-altitude Starlink orbits that are no longer planned. Our study finds that about 10\% of all LSST images will have a streak from the three simulated constellations (Starlink Gen1, Starlink Gen2, and OneWeb, totaling 40,768 satellites as currently planned). It is true, however, that twilight observing campaigns at high airmass --- like those necessary to perform NEO searches --- will have streaks in the majority of images.
+
+
+There is a concerning possibility of sharp increases in satellite population in the next $5–10$ years, overlapping the LSST operations period ($2024–2035$). With a dramatic increase in satellite population, the ability to avoid satellites might become more relevant. 
+It is possible to linearly extrapolate our results to consider a possible LEO satellite population in the hundreds of thousands circa 2030, assuming the orbital distribution in LEO is similar to that of Starlink and OneWeb. A future with 400,000 LEO satellites rather than 40,000 --- the stated goal of various companies intending to launch very large constellations given the present filings\footnote{\url{https://planet4589.org/space/stats/conlist.html}} --- could render the trade-off of 10\% of LSST observing time in order to cut the number of visits with streaks in half worthwhile. 
+\citet{tyson20} find that satellites with AB magnitudes of $g \sim 3.2$ to $y \sim 1.5$ would saturate LSST images. 
+Satellite streaks from Starlink and OneWeb as presently designed are not expected to saturate the LSST Camera's CCD detectors as they have magnitudes of $\sim5$ in their final orbits \citep{Halferty2022}. While a star of $g=10$ would be very saturated in a LSST images, LEO satellites are moving fast enough that their effective exposure time is much lower than astronomical targets. Satellites typically only leave streaks in images when they are both illuminated by the Sun and visible from the observatory, and LEO satellites spend most of the night in Earth's shadow.
+Satellites from other operators may be significantly brighter than present-day Starlink and OneWeb satellites, and may saturate the LSST Camera’s detectors or cause overwhelming levels of non-linear crosstalk. In particular, the Blue Walker 3 satellite is the first of a proposed 100 satellite constellation which have a $V$ magnitude between 1-0. Such a bright satellite would saturate LSST images, potentially causing much higher pixel losses than satellites which have been launched to date.
+ 
+Therefore, one future work direction involves adding brightness weighting to the satellite avoidance algorithm. The idea is to only avoid satellites brighter than a certain brightness threshold. This could potentially reduce the region of avoidance, therefore reducing the loss in observing time and co-added depth. It may be possible to compute optimal starting locations for a series of observations based on satellite forecasts to further optimize satellite avoidance. Finally, since faint trail detection and masking is not perfect, no satellite avoidance strategy will effectively mitigate faint glints and the resulting bogus alerts.
+
+
+\software{Astropy \citep{astropy2013, astropy2018, astropy2022}, 
+          Healpy and HEALpix\footnote{\url{http://healpix.sourceforge.net}} \citep{healpix2005, Zonca2019},
+          Matplotlib \citep{Hunter:2007},
+          Numpy \citep{harris2020array},
+          rubin\_sim \citep{yoachim2022},
+          Scipy \citep{2020SciPy-NMeth},
+          Skyfield \citep{Rhodes2019}, 
+          Shapely \citep{shapely2007}}
+
+
+\begin{acknowledgments}
+We thank the anonymous referee who provided helpful prompt feedback that improved the clarity of the paper.
+JH acknowledges support from the Computing Research Association-Widening Participation (CRA-WP) Distributed Research Experiences for Undergraduates (DREU) program.
+JH and MLR are grateful for LSST Corporation travel support for JH to attend the 2022 Rubin Project and Community Workshop and present a poster.
+MLR acknowledges support from Bob Blum, Leanne Guy, and all of Rubin Operations to spend a fraction of her time on satellite mitigation work; this study would not have been possible without formal recognition that the proliferation of bright commercial LEO satellites poses a threat to LSST science.
+The authors all wish to thank Tony Tyson for valuable discussions and feedback that helped place this work in context.
+This work was facilitated through the use of advanced computational, storage, and networking infrastructure provided by the Hyak supercomputer system at the University of Washington.
+\end{acknowledgments}
+
+
+\bibliographystyle{aasjournal}
+\begin{thebibliography}{}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\providecommand{\url}[1]{\href{#1}{#1}}
+\providecommand{\dodoi}[1]{doi:~\href{http://doi.org/#1}{\nolinkurl{#1}}}
+\providecommand{\doeprint}[1]{\href{http://ascl.net/#1}{\nolinkurl{http://ascl.net/#1}}}
+\providecommand{\doarXiv}[1]{\href{https://arxiv.org/abs/#1}{\nolinkurl{https://arxiv.org/abs/#1}}}
+
+\bibitem[{{Astropy Collaboration} {et~al.}(2013){Astropy Collaboration},
+  {Robitaille}, {Tollerud}, {Greenfield}, {Droettboom}, {Bray}, {Aldcroft},
+  {Davis}, {Ginsburg}, {Price-Whelan}, {Kerzendorf}, {Conley}, {Crighton},
+  {Barbary}, {Muna}, {Ferguson}, {Grollier}, {Parikh}, {Nair}, {Unther},
+  {Deil}, {Woillez}, {Conseil}, {Kramer}, {Turner}, {Singer}, {Fox}, {Weaver},
+  {Zabalza}, {Edwards}, {Azalee Bostroem}, {Burke}, {Casey}, {Crawford},
+  {Dencheva}, {Ely}, {Jenness}, {Labrie}, {Lim}, {Pierfederici}, {Pontzen},
+  {Ptak}, {Refsdal}, {Servillat}, \& {Streicher}}]{astropy2013}
+{Astropy Collaboration}, {Robitaille}, T.~P., {Tollerud}, E.~J., {et~al.} 2013,
+  \aap, 558, A33, \dodoi{10.1051/0004-6361/201322068}
+
+\bibitem[{{Astropy Collaboration} {et~al.}(2018){Astropy Collaboration},
+  {Price-Whelan}, {Sip{\H{o}}cz}, {G{\"u}nther}, {Lim}, {Crawford}, {Conseil},
+  {Shupe}, {Craig}, {Dencheva}, {Ginsburg}, {VanderPlas}, {Bradley},
+  {P{\'e}rez-Su{\'a}rez}, {de Val-Borro}, {Aldcroft}, {Cruz}, {Robitaille},
+  {Tollerud}, {Ardelean}, {Babej}, {Bach}, {Bachetti}, {Bakanov}, {Bamford},
+  {Barentsen}, {Barmby}, {Baumbach}, {Berry}, {Biscani}, {Boquien}, {Bostroem},
+  {Bouma}, {Brammer}, {Bray}, {Breytenbach}, {Buddelmeijer}, {Burke},
+  {Calderone}, {Cano Rodr{\'\i}guez}, {Cara}, {Cardoso}, {Cheedella}, {Copin},
+  {Corrales}, {Crichton}, {D'Avella}, {Deil}, {Depagne}, {Dietrich}, {Donath},
+  {Droettboom}, {Earl}, {Erben}, {Fabbro}, {Ferreira}, {Finethy}, {Fox},
+  {Garrison}, {Gibbons}, {Goldstein}, {Gommers}, {Greco}, {Greenfield},
+  {Groener}, {Grollier}, {Hagen}, {Hirst}, {Homeier}, {Horton}, {Hosseinzadeh},
+  {Hu}, {Hunkeler}, {Ivezi{\'c}}, {Jain}, {Jenness}, {Kanarek}, {Kendrew},
+  {Kern}, {Kerzendorf}, {Khvalko}, {King}, {Kirkby}, {Kulkarni}, {Kumar},
+  {Lee}, {Lenz}, {Littlefair}, {Ma}, {Macleod}, {Mastropietro}, {McCully},
+  {Montagnac}, {Morris}, {Mueller}, {Mumford}, {Muna}, {Murphy}, {Nelson},
+  {Nguyen}, {Ninan}, {N{\"o}the}, {Ogaz}, {Oh}, {Parejko}, {Parley}, {Pascual},
+  {Patil}, {Patil}, {Plunkett}, {Prochaska}, {Rastogi}, {Reddy Janga},
+  {Sabater}, {Sakurikar}, {Seifert}, {Sherbert}, {Sherwood-Taylor}, {Shih},
+  {Sick}, {Silbiger}, {Singanamalla}, {Singer}, {Sladen}, {Sooley},
+  {Sornarajah}, {Streicher}, {Teuben}, {Thomas}, {Tremblay}, {Turner},
+  {Terr{\'o}n}, {van Kerkwijk}, {de la Vega}, {Watkins}, {Weaver}, {Whitmore},
+  {Woillez}, {Zabalza}, \& {Astropy Contributors}}]{astropy2018}
+{Astropy Collaboration}, {Price-Whelan}, A.~M., {Sip{\H{o}}cz}, B.~M., {et~al.}
+  2018, \aj, 156, 123, \dodoi{10.3847/1538-3881/aabc4f}
+
+\bibitem[{{Astropy Collaboration} {et~al.}(2022){Astropy Collaboration},
+  {Price-Whelan}, {Lim}, {Earl}, {Starkman}, {Bradley}, {Shupe}, {Patil},
+  {Corrales}, {Brasseur}, {N{\"o}the}, {Donath}, {Tollerud}, {Morris},
+  {Ginsburg}, {Vaher}, {Weaver}, {Tocknell}, {Jamieson}, {van Kerkwijk},
+  {Robitaille}, {Merry}, {Bachetti}, {G{\"u}nther}, {Aldcroft},
+  {Alvarado-Montes}, {Archibald}, {B{\'o}di}, {Bapat}, {Barentsen},
+  {Baz{\'a}n}, {Biswas}, {Boquien}, {Burke}, {Cara}, {Cara}, {Conroy},
+  {Conseil}, {Craig}, {Cross}, {Cruz}, {D'Eugenio}, {Dencheva}, {Devillepoix},
+  {Dietrich}, {Eigenbrot}, {Erben}, {Ferreira}, {Foreman-Mackey}, {Fox},
+  {Freij}, {Garg}, {Geda}, {Glattly}, {Gondhalekar}, {Gordon}, {Grant},
+  {Greenfield}, {Groener}, {Guest}, {Gurovich}, {Handberg}, {Hart},
+  {Hatfield-Dodds}, {Homeier}, {Hosseinzadeh}, {Jenness}, {Jones}, {Joseph},
+  {Kalmbach}, {Karamehmetoglu}, {Ka{\l}uszy{\'n}ski}, {Kelley}, {Kern},
+  {Kerzendorf}, {Koch}, {Kulumani}, {Lee}, {Ly}, {Ma}, {MacBride}, {Maljaars},
+  {Muna}, {Murphy}, {Norman}, {O'Steen}, {Oman}, {Pacifici}, {Pascual},
+  {Pascual-Granado}, {Patil}, {Perren}, {Pickering}, {Rastogi}, {Roulston},
+  {Ryan}, {Rykoff}, {Sabater}, {Sakurikar}, {Salgado}, {Sanghi}, {Saunders},
+  {Savchenko}, {Schwardt}, {Seifert-Eckert}, {Shih}, {Jain}, {Shukla}, {Sick},
+  {Simpson}, {Singanamalla}, {Singer}, {Singhal}, {Sinha}, {Sip{\H{o}}cz},
+  {Spitler}, {Stansby}, {Streicher}, {{\v{S}}umak}, {Swinbank}, {Taranu},
+  {Tewary}, {Tremblay}, {Val-Borro}, {Van Kooten}, {Vasovi{\'c}}, {Verma}, {de
+  Miranda Cardoso}, {Williams}, {Wilson}, {Winkel}, {Wood-Vasey}, {Xue},
+  {Yoachim}, {Zhang}, {Zonca}, \& {Astropy Project Contributors}}]{astropy2022}
+{Astropy Collaboration}, {Price-Whelan}, A.~M., {Lim}, P.~L., {et~al.} 2022,
+  \apj, 935, 167, \dodoi{10.3847/1538-4357/ac7c74}
+
+\bibitem[{Gillies {et~al.}(2007--)}]{shapely2007}
+Gillies, S., {et~al.} 2007--, Shapely: manipulation and analysis of geometric
+  objects.
+\newblock \url{https://github.com/Toblerity/Shapely}
+
+\bibitem[{{G{\'o}rski} {et~al.}(2005){G{\'o}rski}, {Hivon}, {Banday},
+  {Wandelt}, {Hansen}, {Reinecke}, \& {Bartelmann}}]{healpix2005}
+{G{\'o}rski}, K.~M., {Hivon}, E., {Banday}, A.~J., {et~al.} 2005, \apj, 622,
+  759, \dodoi{10.1086/427976}
+
+\bibitem[{{Halferty} {et~al.}(2022){Halferty}, {Reddy}, {Campbell}, {Battle},
+  \& {Furfaro}}]{Halferty2022}
+{Halferty}, G., {Reddy}, V., {Campbell}, T., {Battle}, A., \& {Furfaro}, R.
+  2022, \mnras, 516, 1502, \dodoi{10.1093/mnras/stac2080}
+
+\bibitem[{{Hall} {et~al.}(2021){Hall}, {Walker}, {Rawls}, {McDowell}, {Seaman},
+  {Venkatesan}, {Lowenthal}, {Green}, {Krafton}, \& {Parriott}}]{satcon2}
+{Hall}, J., {Walker}, C., {Rawls}, M., {et~al.} 2021, in Bulletin of the
+  American Astronomical Society, 2.205, \dodoi{10.3847/25c2cfeb.4554c01f}
+
+\bibitem[{Harris {et~al.}(2020)Harris, Millman, van~der Walt, Gommers,
+  Virtanen, Cournapeau, Wieser, Taylor, Berg, Smith, Kern, Picus, Hoyer, van
+  Kerkwijk, Brett, Haldane, del R{\'{i}}o, Wiebe, Peterson,
+  G{\'{e}}rard-Marchant, Sheppard, Reddy, Weckesser, Abbasi, Gohlke, \&
+  Oliphant}]{harris2020array}
+Harris, C.~R., Millman, K.~J., van~der Walt, S.~J., {et~al.} 2020, Nature, 585,
+  357, \dodoi{10.1038/s41586-020-2649-2}
+
+\bibitem[{{Hasan} {et~al.}(2022){Hasan}, {Tyson}, {Saunders}, \&
+  {Xin}}]{hasan22}
+{Hasan}, I., {Tyson}, J.~A., {Saunders}, C., \& {Xin}, B. 2022, Astronomy and
+  Computing, 39, 100584, \dodoi{10.1016/j.ascom.2022.100584}
+
+\bibitem[{Hunter(2007)}]{Hunter:2007}
+Hunter, J.~D. 2007, Computing in Science \& Engineering, 9, 90,
+  \dodoi{10.1109/MCSE.2007.55}
+
+\bibitem[{{Ivezi{\'c}} {et~al.}(2019){Ivezi{\'c}}, {Kahn}, {Tyson}, {Abel},
+  {Acosta}, {Allsman}, {Alonso}, {AlSayyad}, {Anderson}, {Andrew}, \&
+  et~al.}]{overview}
+{Ivezi{\'c}}, {\v Z}., {Kahn}, S.~M., {Tyson}, J.~A., {et~al.} 2019, \apj, 873,
+  111, \dodoi{10.3847/1538-4357/ab042c}
+
+\bibitem[{{Lawrence} {et~al.}(2022){Lawrence}, {Rawls}, {Jah}, {Boley}, {Di
+  Vruno}, {Garrington}, {Kramer}, {Lawler}, {Lowenthal}, {McDowell}, \&
+  {McCaughrean}}]{lawrence22}
+{Lawrence}, A., {Rawls}, M.~L., {Jah}, M., {et~al.} 2022, Nature Astronomy, 6,
+  428, \dodoi{10.1038/s41550-022-01655-6}
+
+\bibitem[{{Naghib} {et~al.}(2019){Naghib}, {Yoachim}, {Vanderbei}, {Connolly},
+  \& {Jones}}]{naghib19}
+{Naghib}, E., {Yoachim}, P., {Vanderbei}, R.~J., {Connolly}, A.~J., \& {Jones},
+  R.~L. 2019, \aj, 157, 151, \dodoi{10.3847/1538-3881/aafece}
+
+\bibitem[{{Rhodes}(2019)}]{Rhodes2019}
+{Rhodes}, B. 2019, {Skyfield: High precision research-grade positions for
+  planets and Earth satellites generator}, Astrophysics Source Code Library,
+  record ascl:1907.024.
+\newblock \doeprint{1907.024}
+
+\bibitem[{{Tyson} {et~al.}(2020){Tyson}, {Ivezi{\'c}}, {Bradshaw}, {Rawls},
+  {Xin}, {Yoachim}, {Parejko}, {Greene}, {Sholl}, {Abbott}, \&
+  {Polin}}]{tyson20}
+{Tyson}, J.~A., {Ivezi{\'c}}, {\v{Z}}., {Bradshaw}, A., {et~al.} 2020, \aj,
+  160, 226, \dodoi{10.3847/1538-3881/abba3e}
+
+\bibitem[{Virtanen {et~al.}(2020)Virtanen, Gommers, Oliphant, Haberland, Reddy,
+  Cournapeau, Burovski, Peterson, Weckesser, Bright, {van der Walt}, Brett,
+  Wilson, Millman, Mayorov, Nelson, Jones, Kern, Larson, Carey, Polat, Feng,
+  Moore, {VanderPlas}, Laxalde, Perktold, Cimrman, Henriksen, Quintero, Harris,
+  Archibald, Ribeiro, Pedregosa, {van Mulbregt}, \& {SciPy 1.0
+  Contributors}}]{2020SciPy-NMeth}
+Virtanen, P., Gommers, R., Oliphant, T.~E., {et~al.} 2020, Nature Methods, 17,
+  261, \dodoi{10.1038/s41592-019-0686-2}
+
+\bibitem[{{Walker} {et~al.}(2020{\natexlab{a}}){Walker}, {Hall}, {Allen},
+  {Green}, {Seitzer}, {Tyson}, {Bauer}, {Krafton}, {Lowenthal}, {Parriott},
+  {Puxley}, {Abbott}, {Bakos}, {Barentine}, {Bassa}, {Blakeslee}, {Bradshaw},
+  {Cooke}, {Devost}, {Galad{\'\i}-Enr{\'\i}quez}, {Haase}, {Hainaut},
+  {Heathcote}, {Jah}, {Krantz}, {Kucharski}, {McDowell}, {Mr{\'o}z}, {Otarola},
+  {Pearce}, {Rawls}, {Saunders}, {Seaman}, {Siminski}, {Snyder},
+  {Storrie-Lombardi}, {Tregloan-Reed}, {Wainscoat}, {Williams}, \&
+  {Yoachim}}]{satcon1}
+{Walker}, C., {Hall}, J., {Allen}, L., {et~al.} 2020{\natexlab{a}}, in Bulletin
+  of the American Astronomical Society, Vol.~52, 0206,
+  \dodoi{10.3847/25c2cfeb.346793b8}
+
+\bibitem[{{Walker} {et~al.}(2020{\natexlab{b}}){Walker}, {Di Pippo},
+  {Aub{\'e}}, {Barentine}, {Benkhaldoun}, {Benvenuti}, {Bouroussis}, {Green},
+  {Hearnshaw}, {Mackenzie}, {Liszt}, {Lowenthal}, {Mu{\~n}oz-Tu{\~n}{\'o}n},
+  {Nield}, {Ricard}, {Rodriguez Espinosa}, {Sanhueza}, {Varela P{\'e}rez},
+  {Williams}, {Lau}, {Mu{\~n}oz Tu{\~n}{\'o}n}, {Rodr{\'\i}guez Espinosa},
+  {Mu{\~n}oz-Tu{\~n}on}, {Armas}, {Benn}, {Blattner}, {Diaz-Castro}, {Donners},
+  {Douglas}, {Ga{\v{s}}parovsk{\'y}}, {Hall}, {Koll{\'a}th}, {Novak},
+  {Ortolani}, {Rodr{\'\i}guez Espinosa}, {Lowenthal}, {Bara}, {J{\"a}gerbrand},
+  {Jechow}, {Longcore}, {Motta}, {Schlangen}, {Schroer}, {Lucatello},
+  {Galad{\'\i}-Enr{\'\i}quez}, {Micheva}, {Otarola}, {Allen}, {Bannister},
+  {Barstow}, {Bassa}, {Davies}, {Devost}, {Hainaut}, {Jah}, {Krafton},
+  {Krantz}, {Kucharski}, {Maclay}, {Massey}, {Mudd}, {McDowell}, {Parriott},
+  {Pearce}, {Rawls}, {Rotola}, {Seaman}, {Seitzer}, {Siminski},
+  {Storrie-Lombardi}, {Street}, {Tregloan-Reed}, {Tyson}, {Unda-Sanzana},
+  {Wainscoat}, \& {Zamora}}]{dqs1}
+{Walker}, C., {Di Pippo}, S., {Aub{\'e}}, M., {et~al.} 2020{\natexlab{b}},
+  {Dark \& Quiet Skies I (2020)}, Dark \& Quiet Skies I (2020), Report of the
+  conference held 5-9 October, 2020., \dodoi{10.5281/zenodo.5898785}
+
+\bibitem[{{Walker} {et~al.}(2021){Walker}, {Di Pippo}, {Aub{\'e}}, {Barentine},
+  {Benkhaldoun}, {Benvenuti}, {Bouroussis}, {Di Vruno}, {Green}, {Hearnshaw},
+  {Aoraki}, {Liszt}, {Lowenthal}, {Mu{\~n}oz-Tu{\~n}{\'o}n}, {Nield}, {Ohishi},
+  {Ricard}, {Rodriguez Espinosa}, {Rotola}, {Sanhueza}, {Var{\'e}la P{\'e}rez},
+  {Williams}, {Cameron}, {H{\"a}nel}, {Hartley}, {Krop-Benesch}, {Lien},
+  {Motta}, {Ribas}, {Rol}, {Yakushina}, {Zielinska-Dabkowska}, {Zhao},
+  {Aganaba}, {Boley}, {Cirkovic}, {Falle}, {Freeland}, {Hallet}, {Hanlon},
+  {Jakhu}, {Jamschon MacGarry}, {Johnson}, {Kazlouskaya}, {Martin},
+  {Masson-Zwaan}, {Mishra}, {Moro-Aguilar}, {Mudd}, {Simon-Butler}, {Van Eijk},
+  {Venn}, {Wager}, {Alis}, {Berry}, {Bharadwaj}, {Davis}, {Lagadec}, {Le
+  Breuilly}, {Lucatello}, {Massey}, {Parriott}, {Valdivia}, {Weeden}, {Hofer},
+  {Andrade}, {Askari}, {Baruch}, {Bohnlein}, {Dunn}, {Grunsfeld}, {Jansson},
+  {Knox}, {Raval}, {Sedwick}, {Smith}, {Vanotti}, {Bassa}, {Cui}, {Galadi},
+  {Hainaut}, {Hasan}, {K{\'e}b{\'e}}, {Lawler}, {McDowell}, {Otarola}, {Rawls},
+  {Seitzer}, {Street}, {Pree}, {Gergely}, {Hellbourg}, {Indermuehle},
+  {Lindqvist}, {Tzioumis}, {Vanderley}, {Winkel}, \& {Zhang}}]{dqs2}
+---. 2021, {Dark \& Quiet Skies II (2021)}, Dark \& Quiet Skies II (2021),
+  Report of the conference held 3-7 October, 2021.,
+  \dodoi{10.5281/zenodo.5874725}
+
+\bibitem[{Yoachim {et~al.}(2022{\natexlab{a}})Yoachim, Jones, Eric H.~Neilsen,
+  \& Ribeiro}]{yoachim2022b}
+Yoachim, P., Jones, R.~L., Eric H.~Neilsen, J., \& Ribeiro, T.
+  2022{\natexlab{a}}, {lsst-sims/sims\_featureScheduler\_runs2.2: Initial
+  release}, v1.0.0,  Zenodo, \dodoi{10.5281/zenodo.7150784}
+
+\bibitem[{Yoachim {et~al.}(2022{\natexlab{b}})Yoachim, Jones, Eric H.~Neilsen,
+  Tiago, Carlin, pgris, Prisinzano, Bellm, Sick, lmptc, LI, nsabrams, Becker,
+  Bricman, Bregeon, Kelley, \& Andreoni}]{yoachim2022}
+Yoachim, P., Jones, L., Eric H.~Neilsen, J., {et~al.} 2022{\natexlab{b}},
+  lsst/rubin\_sim: 0.12.1, 0.12.1,  Zenodo, \dodoi{10.5281/zenodo.7087823}
+
+\bibitem[{Zonca {et~al.}(2019)Zonca, Singer, Lenz, Reinecke, Rosset, Hivon, \&
+  Gorski}]{Zonca2019}
+Zonca, A., Singer, L., Lenz, D., {et~al.} 2019, Journal of Open Source
+  Software, 4, 1298, \dodoi{10.21105/joss.01298}
+
+\end{thebibliography}
+
+
+\end{document}
